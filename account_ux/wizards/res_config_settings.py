@@ -4,10 +4,8 @@
 ##############################################################################
 from odoo import fields, models, api
 
-
-class ResConfigSettings(models.TransientModel):
-
-    _inherit = 'res.config.settings'
+class ResCompany(models.Model):
+    _inherit = 'res.company'
 
     sale_tax_ids = fields.Many2many(
         'account.tax',
@@ -20,6 +18,24 @@ class ResConfigSettings(models.TransientModel):
         'account.tax',
         'config_purchase_tax_default_rel',
         'account_id', 'purchase_tax_id',
+        string="Default Purchase Taxes",
+        help="This purchase tax will be assigned by default on new products.",
+    )
+
+
+class ResConfigSettings(models.TransientModel):
+
+    _inherit = 'res.config.settings'
+
+    sale_tax_ids = fields.Many2many(
+        related='company_id.sale_tax_ids',
+        readonly=False,
+        string="Default Sale Taxes",
+        help="This sale tax will be assigned by default on new products.",
+    )
+    purchase_tax_ids = fields.Many2many(
+        related='company_id.purchase_tax_ids',
+        readonly=False,
         string="Default Purchase Taxes",
         help="This purchase tax will be assigned by default on new products.",
     )
