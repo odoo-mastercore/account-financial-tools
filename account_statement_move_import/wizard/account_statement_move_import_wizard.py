@@ -131,7 +131,7 @@ class AccountStatementMoveImportWizard(models.TransientModel):
                 'statement_id': statement.id,
                 'date': line.date,
                 'name': line.name or '/',
-                'ref': line.ref,
+                'payment_ref': line.ref or '/',
                 'amount': amount,
                 'partner_id': line.partner_id.id,
             }
