@@ -34,6 +34,7 @@
     'data': [
         'wizard/account_statement_move_import_wizard_view.xml',
         'views/account_views.xml',
+        'security/ir.model.access.csv'
     ],
     'demo': [
     ],
