@@ -25,7 +25,7 @@ class ResCompanyInterest(models.Model):
         string='Cuentas a Cobrar',
         help='Cuentas a Cobrar que se tendrán en cuenta para evaular la deuda',
         required=True,
-        domain=lambda self: [('user_type_id.type', '=', 'receivable'),
+        domain=lambda self: [('account_type', '=', 'asset_receivable'),
                              ('company_id', '=', self._context.get('default_company_id') or self.env.company.id)],
     )
     interest_product_id = fields.Many2one(
@@ -33,7 +33,7 @@ class ResCompanyInterest(models.Model):
         'Interest Product',
         required=True,
     )
-    analytic_account_id = fields.Many2one(
+    analytic_line_ids = fields.Many2one(
         'account.analytic.account',
         'Analytic account',
     )
@@ -89,6 +89,8 @@ class ResCompanyInterest(models.Model):
             _logger.info(
                 'Creating Interest Invoices (id: %s, company: %s)', rec.id,
                 rec.company_id.name)
+            # hacemos un commit para refrescar cache
+            self.env.cr.commit()
             interests_date = rec.next_date
 
             rule_type = rec.rule_type
@@ -114,7 +116,9 @@ class ResCompanyInterest(models.Model):
             # para lo que vencio en este ultimo periodo
             to_date = interests_date - tolerance_delta
             from_date = to_date - tolerance_delta
-            rec.with_context(default_l10n_ar_afip_asoc_period_start=from_date,
+            # llamamos a crear las facturas con la compañia del interes para
+            # que tome correctamente las cuentas
+            rec.with_company(rec.company_id).with_context(default_l10n_ar_afip_asoc_period_start=from_date,
                              default_l10n_ar_afip_asoc_period_end=to_date).create_invoices(to_date)
 
             # seteamos proxima corrida en hoy mas un periodo
@@ -125,16 +129,14 @@ class ResCompanyInterest(models.Model):
         move_line_domain = [
             ('account_id', 'in', self.receivable_account_ids.ids),
             ('full_reconcile_id', '=', False),
-            ('date_maturity', '<', to_date)
+            ('date_maturity', '<', to_date),
+            ('partner_id.active', '=', True),
+            ('parent_state', '=', 'posted'),
         ]
         return move_line_domain
 
     def create_invoices(self, to_date, groupby='partner_id'):
         self.ensure_one()
-
-        journal = self.env['account.journal'].search([
-            ('type', '=', 'sale'),
-            ('company_id', '=', self.company_id.id)], limit=1)
 
         move_line_domain = self._get_move_line_domains(to_date)
 
@@ -174,12 +176,18 @@ class ResCompanyInterest(models.Model):
             partner_id = line[groupby][0]
 
             partner = self.env['res.partner'].browse(partner_id)
+
+            # Necesitamos que la factura a generar se cree en un diaro compatible, simulamos crear una nota de debito
+            # para que el odoo auto calcule el diario mas recomendable y usamos ese para crear las factura de interes
+            # relacionada a cada partner
+            journal = self.env['account.move'].with_context(
+                internal_type='debit_note', default_move_type='out_invoice').new(
+                    {'partner_id': partner_id, 'move_type': 'out_invoice'}).journal_id
+
             move_vals = self._prepare_interest_invoice(
                 partner, debt, to_date, journal)
 
-            # We send document type for compatibility with argentinian invoices
-            move = self.env['account.move'].with_context(
-                internal_type='debit_note').create(move_vals)
+            move = self.env['account.move'].create(move_vals)
 
             if self.automatic_validation:
                 try:
@@ -228,10 +236,21 @@ class ResCompanyInterest(models.Model):
                 "price_unit": self.rate * debt,
                 "partner_id": partner.id,
                 "name": self.interest_product_id.name + '.\n' + comment,
-                "analytic_account_id": self.analytic_account_id.id,
+                "analytic_line_ids": [(self.analytic_line_ids.id, )],
                 "tax_ids": [(6, 0, tax_id.ids)]
             })],
         }
+
+        # hack para evitar modulo glue con l10n_latam_document
+        if journal._fields.get('l10n_latam_use_documents') and journal.l10n_latam_use_documents:
+            debit_note = self.env['account.move'].new({
+                'move_type': 'out_invoice',
+                'journal_id': journal.id,
+                'partner_id': partner.id,
+                'company_id': self.company_id.id,
+            })
+            document_types = debit_note.l10n_latam_available_document_type_ids.filtered(lambda x: x.internal_type == 'debit_note')
+            invoice_vals['l10n_latam_document_type_id'] = document_types and document_types[0]._origin.id or debit_note.l10n_latam_document_type_id.id
 
         return invoice_vals
 

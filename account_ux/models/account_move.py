@@ -16,6 +16,11 @@ class AccountMove(models.Model):
     )
     other_currency = fields.Boolean(compute='_compute_other_currency')
 
+    def get_invoice_report(self):
+        self.ensure_one()
+        bin_data, __ = self.env['ir.actions.report']._render_qweb_pdf('account.account_invoices', self.id)
+        return bin_data, __
+
     @api.depends('company_currency_id', 'currency_id')
     def _compute_other_currency(self):
         other_currency = self.filtered(lambda x: x.company_currency_id != x.currency_id)
@@ -118,3 +123,38 @@ class AccountMove(models.Model):
             for item in move.invoice_outstanding_credits_debits_widget['content']:
                 amount_residual = self.env['account.move.line'].browse(item['id']).amount_residual
                 item['amount'] = move.currency_id.round(amount_residual * rate)
+
+    @api.depends('invoice_date')
+    def _compute_invoice_date_due(self):
+        """ Si la factura no tiene término de pago y la misma tiene fecha de vencimiento anterior al día de hoy y la factura no tiene fecha entonces cuando se publica la factura, la fecha de vencimiento tiene que coincidir con la fecha de hoy. """
+        invoices_with_old_data_due = self.filtered(lambda x: x.invoice_date and not x.invoice_payment_term_id and (not x.invoice_date_due or x.invoice_date_due < x.invoice_date))
+        invoices = self - invoices_with_old_data_due
+        for inv in invoices_with_old_data_due:
+            if inv.invoice_date:
+                inv.invoice_date_due = inv.invoice_date
+        return super(AccountMove, invoices)._compute_invoice_date_due()
+
+    @api.constrains('state')
+    def _check_company_on_lines(self):
+        for move in self.filtered(lambda x: x.state == 'posted'):
+            lines_with_problem = s = move.line_ids.filtered(lambda x: x.account_id and x.account_id.company_id != move.company_id)
+            if lines_with_problem:
+                raise UserError(_(
+                    "There is at least one account in the journal entry of this move that belongs to a company that "
+                    "is different to the company of the move (id: %s)\n- %s" % (
+                        move.id, '\n- '.join(lines_with_problem.mapped('display_name')))))
+
+    def _compute_currency_id(self):
+        """ Si la factura tenía currency_id no queremos cambiarla si cambia el diario """
+        invoices_with_currency_id = self.filtered(lambda x: x.currency_id)
+        return super(AccountMove, self - invoices_with_currency_id)._compute_currency_id()
+
+    @api.constrains('date', 'invoice_date')
+    def _check_dates_on_invoices(self):
+        """ Prevenir que en facturas de cliente queden distintos los campos de factura/recibo y fecha (date e invoice date). Pueden quedar distintos si se modifica alguna de esas fechas a través de edición masiva por ejemplo, entonces con esta constrains queremos prevenir que eso suceda.  """
+        invoices_to_check = self.filtered(lambda x: x.date!=x.invoice_date if x.is_sale_document() and x.date and x.invoice_date else False)
+        if invoices_to_check:
+            error_msg = _('\nDate\t\t\tInvoice Date\t\tInvoice\n')
+            for rec in invoices_to_check:
+                error_msg +=  str(rec.date) + '\t'*2 + str(rec.invoice_date) + '\t'*3 + rec.display_name + '\n'
+            raise UserError(_('The date and invoice date of a sale invoice must be the same: %s') % (error_msg))

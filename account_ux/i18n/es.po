@@ -4,16 +4,16 @@
 # 
 # Translators:
 # Mariana Torres <mt@adhoc.com.ar>, 2022
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2022
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-04 13:38+0000\n"
+"POT-Creation-Date: 2024-01-15 18:04+0000\n"
 "PO-Revision-Date: 2022-11-02 16:50+0000\n"
-"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2022\n"
-"Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2023\n"
+"Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -21,9 +21,31 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: account_ux
+#. odoo-python
+#: code:addons/account_ux/models/account_move.py:0
+#, python-format
+msgid ""
+"\n"
+"Date\t\t\tInvoice Date\t\tInvoice\n"
+msgstr ""
+
+#. module: account_ux
+#: model_terms:ir.ui.view,arch_db:account_ux.view_res_config_settings
+msgid ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
+"specific.\" aria-label=\"Values set here are company-specific.\" "
+"groups=\"base.group_multi_company\" role=\"img\"/>"
+msgstr ""
+
+#. module: account_ux
 #: model:ir.model,name:account_ux.model_account_account
 msgid "Account"
 msgstr "Cuenta"
+
+#. module: account_ux
+#: model:ir.model,name:account_ux.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Plantilla de Plan de Cuentas"
 
 #. module: account_ux
 #: model:ir.model,name:account_ux.model_account_group
@@ -41,21 +63,6 @@ msgid "Add an internal note..."
 msgstr "Agregar una nota interna"
 
 #. module: account_ux
-#: model:ir.model.fields,field_description:account_ux.field_account_account__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_account_change_currency__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_account_group__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_account_journal__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_account_move__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_account_move_line__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_account_partial_reconcile__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_res_config_settings__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_res_currency_rate__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_res_partner__algolia_search
-#: model:ir.model.fields,field_description:account_ux.field_validate_account_move__algolia_search
-msgid "Algolia Search"
-msgstr ""
-
-#. module: account_ux
 #: model_terms:ir.ui.view,arch_db:account_ux.view_account_invoice_tree
 msgid "Amount total"
 msgstr "Monto Total"
@@ -69,6 +76,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_ux.field_account_account__analytic_distribution_required
 msgid "Analytic Distribution Required?"
 msgstr "¿Cuenta analítica requerida?"
+
+#. module: account_ux
+#: model:ir.model,name:account_ux.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr "Línea de extracto bancario"
 
 #. module: account_ux
 #: model_terms:ir.ui.view,arch_db:account_ux.view_account_change_currency
@@ -97,6 +109,11 @@ msgstr "Cambiar Tipo"
 #: model:ir.model.fields,field_description:account_ux.field_account_group__child_ids
 msgid "Child"
 msgstr "Hijo"
+
+#. module: account_ux
+#: model:ir.model,name:account_ux.model_res_company
+msgid "Companies"
+msgstr "Compañías"
 
 #. module: account_ux
 #: model_terms:ir.ui.view,arch_db:account_ux.view_account_invoice_filter
@@ -235,7 +252,7 @@ msgstr "Agrupar por..."
 #. module: account_ux
 #: model:ir.model.fields,field_description:account_ux.field_account_change_currency__id
 msgid "ID"
-msgstr ""
+msgstr "ID (identificación)"
 
 #. module: account_ux
 #: model:ir.model.fields,help:account_ux.field_account_account__analytic_distribution_required
@@ -308,10 +325,8 @@ msgid "Match Payments"
 msgstr ""
 
 #. module: account_ux
-#. odoo-python
-#: code:addons/account_ux/wizards/account_validate_account_move.py:0
-#, python-format
-msgid "Missing 'active_model' in context."
+#: model_terms:ir.ui.view,arch_db:account_ux.view_account_payment_tree_personalization
+msgid "Memo"
 msgstr ""
 
 #. module: account_ux
@@ -347,6 +362,11 @@ msgid "Partner"
 msgstr "Empresa"
 
 #. module: account_ux
+#: model_terms:ir.ui.view,arch_db:account_ux.view_account_invoice_filter
+msgid "Paid"
+msgstr "Pagado"
+
+#. module: account_ux
 #. odoo-python
 #: code:addons/account_ux/models/account_move.py:0
 #, python-format
@@ -354,6 +374,12 @@ msgid "Please check the email template associated with the invoice journal."
 msgstr ""
 "Compruebe la plantilla de correo electrónico asociada con el diario de "
 "facturas."
+
+#. module: account_ux
+#: model:ir.model.fields,field_description:account_ux.field_res_company__reconcile_on_company_currency
+#: model:ir.model.fields,field_description:account_ux.field_res_config_settings__reconcile_on_company_currency
+msgid "Reconcile On Company Currency"
+msgstr ""
 
 #. module: account_ux
 #: model:ir.ui.menu,name:account_ux.menu_reconciliations_main
@@ -385,7 +411,7 @@ msgstr ""
 #. module: account_ux
 #: model:ir.model.fields,help:account_ux.field_account_change_currency__currency_rate
 msgid "Select a rate to apply on the invoice"
-msgstr ""
+msgstr "Seleccione una tasa para aplicar en la factura"
 
 #. module: account_ux
 #: model:res.groups,name:account_ux.group_reference_on_tree_and_main_form
@@ -423,6 +449,22 @@ msgid "Source Document"
 msgstr ""
 
 #. module: account_ux
+#. odoo-python
+#: code:addons/account_ux/models/account_move.py:0
+#, python-format
+msgid "The date and invoice date of a sale invoice must be the same: %s"
+msgstr ""
+
+#. module: account_ux
+#. odoo-python
+#: code:addons/account_ux/models/account_move.py:0
+#, python-format
+msgid ""
+"There is at least one account in the journal entry of this move that belongs to a company that is different to the company of the move (id: %s)\n"
+"- %s"
+msgstr ""
+
+#. module: account_ux
 #: model:ir.model.fields,help:account_ux.field_res_config_settings__purchase_tax_ids
 msgid "This purchase tax will be assigned by default on new products."
 msgstr ""
@@ -452,11 +494,6 @@ msgid "Update both currency and values"
 msgstr "Actualizar la moneda y la cotizacion"
 
 #. module: account_ux
-#: model:ir.model,name:account_ux.model_validate_account_move
-msgid "Validate Account Move"
-msgstr "Validar movimiento contable"
-
-#. module: account_ux
 #: model_terms:ir.ui.view,arch_db:account_ux.view_move_form
 msgid ""
 "Warning! This can't be undone. Deleting the number will allow you to delete "
@@ -468,6 +505,23 @@ msgstr ""
 "eliminar esta factura u obtener un nuevo número si lo revalida. Si esta "
 "factura representa una factura anulada, entonces no debe limpiarla. ¿Quieres"
 " continuar?"
+
+#. module: account_ux
+#: model:ir.model.fields,help:account_ux.field_res_company__reconcile_on_company_currency
+#: model:ir.model.fields,help:account_ux.field_res_config_settings__reconcile_on_company_currency
+msgid ""
+"When reconciling debt with secondary currency, if the account doesn't have a"
+" currency configured, then reconcile on company currency. This will avoid "
+"all the automatic exchange rates journal entries by forcing  same rate of "
+"the original document being reconcile"
+msgstr ""
+
+#. module: account_ux
+#: model_terms:ir.ui.view,arch_db:account_ux.view_res_config_settings
+msgid ""
+"When reconciling debt with secondary currency, if the account doesn't have a currency configured, then reconcile on company currency. This will avoid all the automatic exchange rates journal entries by forcing same rate of the original document being reconcile.\n"
+"                            IMPORTANT: If you change this setting if you reconcile any previous item and re-reconcile it, it will be reconciled with the new mechanism"
+msgstr ""
 
 #. module: account_ux
 #. odoo-python

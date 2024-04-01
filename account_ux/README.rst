@@ -30,6 +30,7 @@ Several Improvements to accounting:
 #. Do not allow to set same Company Currency on Journals or Accounts (enforce to keep empty if that is the cases)
 #. On accounts only allow to choose account groups without children groups (last group on the hierarchy).
 #. Allow to set more than one default tax for sales/purchases, useful for multicompany but also for perceptions or similar tax applied together with vat's.
+#. Add maturity date on manual journal entries
 #. Add internal notes on invoices (account.move) to be used later by sales / pickings
 #. Show the "Reversal of" field always, like the origin field, not matter if the field is set or not or the type of account.move.
 #. Add filter by vat in the partners list views.
@@ -45,6 +46,8 @@ Several Improvements to accounting:
 
 #. Add amount_total and amount_untaxed in the invoice tree view as optional and hide fields
 #. Make Debit Note Origin field visible and editable by the user in the account.move form view. This will help to link new debit notes with the original invoice when this ones were not created from invoices "Add Debit Note" action button directly.
+#. Add field 'ref' in view_account_payment_tree.
+#. On payments, fix the use case where a journal is only suitable for one kind of operation (lets said inbound) and it is selected but then the user selects "outbound" type. Without this fix, the journals remains selected
 
 Installation
 ============
