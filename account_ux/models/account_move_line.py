@@ -3,7 +3,9 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
@@ -51,10 +53,23 @@ class AccountMoveLine(models.Model):
                 return abs(vals['amount_currency']) / abs(vals['balance'])
 
         company_currency = debit_vals['company'].currency_id
+        #Se agrego este bloque condicional pues la solucion esta perfecta para
+        # facturas en moneda de la compañia pero cuando se aplica en facturas
+        # con base en usd nos interesa que si realice diferencias en cambio.
+        types = ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']
+        company_currency_invoice = False
+        if credit_vals['record'].move_id.move_type in types and \
+            credit_vals['record'].move_id.currency_id == company_currency:
+            company_currency_invoice = True
+
+        elif debit_vals['record'].move_id.move_type in types and \
+            debit_vals['record'].move_id.currency_id == company_currency:
+            company_currency_invoice = True
+
         reconcile_on_company_currency = debit_vals['company'].reconcile_on_company_currency and \
             (debit_vals['currency'] != company_currency or credit_vals['currency'] != company_currency) and \
             not debit_vals['record'].account_id.currency_id
-        if reconcile_on_company_currency:
+        if reconcile_on_company_currency and company_currency_invoice:
             if debit_vals['currency'] != debit_vals['company'].currency_id:
                 debit_vals['original_currency'] = debit_vals['currency']
                 debit_vals['original_amount_residual_currency'] = debit_vals['amount_residual_currency']
@@ -67,7 +82,7 @@ class AccountMoveLine(models.Model):
                 credit_vals['amount_residual_currency'] = credit_vals['amount_residual']
         res = super()._prepare_reconciliation_single_partial(debit_vals, credit_vals)
 
-        if reconcile_on_company_currency and 'partial_vals' in res:
+        if reconcile_on_company_currency and company_currency_invoice and 'partial_vals' in res:
             if 'original_currency' in credit_vals:
                 credit_vals['currency'] = credit_vals['original_currency']
                 rate = get_accounting_rate(credit_vals)
