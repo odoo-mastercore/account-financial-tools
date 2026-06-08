@@ -70,6 +70,11 @@ class AccountBankStatementLine(models.Model):
             # liquidity_lines.account_id = outstanding_account.id
 
         super().action_undo_reconciliation()
+        # After super() recreates BSL move lines via Command.clear()+create(), the stored field
+        # amount_residual is left NULL because the recompute is skipped in that context.
+        # NULL is read as 0.0 by the ORM, making _compute_is_reconciled set is_reconciled=True
+        # on BSLs that are actually unreconciled. Force the recompute here to fix that.
+        self.mapped("move_id.line_ids")._compute_amount_residual()
         to_post.mapped("move_id").action_post()
         # publicamos los asientos de las líneas del extracto contable
         # for st_line in st_lines_to_fix:
